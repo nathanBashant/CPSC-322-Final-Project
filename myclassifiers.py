@@ -4,7 +4,7 @@ CPSC 322-02, Fall 2022
 Partner Project
 12/1/2022
 
-Description: This module contains classes different classifiers.
+Description: This module contains classes for different classifiers.
 """
 import operator
 import math

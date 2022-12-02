@@ -37,3 +37,10 @@ def box_plot(distributions, labels, title):
     plt.xticks(list(range(1, len(distributions) + 1)), labels)
     plt.title(title)
     plt.show()
+
+def bar_chart_example(x, y):
+    plt.figure()
+    plt.bar(x, y)
+    plt.show()
+
+

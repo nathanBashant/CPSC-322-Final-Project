@@ -429,4 +429,4 @@ class MyPyTable:
                 counts.append(1)
             else:
                 counts[-1] += 1
-        return MyPyTable(values, counts)
+        return values, counts

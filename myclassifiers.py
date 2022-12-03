@@ -90,7 +90,7 @@ class MyKNeighborsClassifier:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
         y_predicted = []
-        neighbor_indices = self.kneighbors(X_test)[1]
+        distances, neighbor_indices = self.kneighbors(X_test)
         for test_instance_index in range(len(X_test)):
             y_vals = []
             for index in neighbor_indices[test_instance_index]:
@@ -111,6 +111,62 @@ class MyKNeighborsClassifier:
             else:
                 dist_vals.append(1)
         return np.sqrt(sum(dist_vals))
+
+class MyDummyClassifier:
+    """Represents a "dummy" classifier using the "most_frequent" strategy.
+        The most_frequent strategy is a Zero-R classifier, meaning it ignores
+        X_train and produces zero "rules" from it. Instead, it only uses
+        y_train to see what the most frequent class label is. That is
+        always the dummy classifier's prediction, regardless of X_test.
+
+    Attributes:
+        most_common_label(obj): whatever the most frequent class label in the
+            y_train passed into fit()
+
+    Notes:
+        Loosely based on sklearn's DummyClassifier:
+            https://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html
+    """
+    def __init__(self):
+        """Initializer for DummyClassifier.
+
+        """
+        self.most_common_label = None
+
+    def fit(self, X_train, y_train):
+        """Fits a dummy classifier to X_train and y_train.
+
+        Args:
+            X_train(list of list of numeric vals): The list of training instances (samples).
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+
+        Notes:
+            Since Zero-R only predicts the most frequent class label, this method
+                only saves the most frequent class label.
+        """
+        # had to figure out some way to use X_train so pylint
+        # would not deduct points for not using it
+        if X_train is not None:
+            self.most_common_label = stats.mode(y_train)[0][0]
+
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+
+        Args:
+            X_test(list of list of numeric vals): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        y_predicted = []
+        i = 0
+        while i < len(X_test):
+            y_predicted.append(self.most_common_label)
+            i += 1
+        return y_predicted
 
 class MyDecisionTreeClassifier:
     """Represents a decision tree classifier.

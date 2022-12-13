@@ -1,7 +1,15 @@
+"""
+Reid Plowman, Nathan Bashant
+CPSC 322-02, Fall 2022
+Partner Project
+12/1/2022
+
+Description: This module contains utility functions for use in the Jupyter Notebook.
+"""
 import numpy as np
 from tabulate import tabulate
 
-import myevaluation
+from mysklearn import myevaluation
 
 def discretizer(var):
     if var >= 80:

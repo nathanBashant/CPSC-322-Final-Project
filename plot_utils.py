@@ -8,6 +8,7 @@ Description: This module contains reusable plotting functions
     that can be used in the Jupyter Notebooks.
 """
 import matplotlib.pyplot as plt
+
 def plot_bar_chart(x_vals, y_vals, x_label, y_label, title, disp_bar_vals=False, size=None):
     """Displayes a bar chart of the given x and y data.
 
@@ -147,8 +148,3 @@ def compute_correlation_and_covariance(x_vals, y_vals):
     cov = sum([(x_vals[i] - x_mean) * (y_vals[i] - y_mean) for i in range(len(x_vals))]) \
         / len(x_vals)
     return corr, cov
-
-def bar_chart_example(x, y):
-    plt.figure()
-    plt.bar(x, y)
-    plt.show()

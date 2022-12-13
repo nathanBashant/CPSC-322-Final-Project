@@ -442,3 +442,48 @@ class MyDecisionTreeClassifier:
                 # we have a match, recurse on this value's subtree
                 return self.tdidt_predict(value_list[2], instance)
         return None
+
+class MyRandomForestClassifier:
+    """Represents a random forest classifier.
+
+    Attributes:
+        X_train(list of list of obj): The list of training instances (samples).
+                The shape of X_train is (n_train_samples, n_features)
+        y_train(list of obj): The target y values (parallel to X_train).
+            The shape of y_train is n_samples
+
+        TODO: Fill this out properly
+
+    Notes:
+        Terminology: instance = sample = row and attribute = feature = column
+    """
+    def __init__(self):
+        """Initializer for MyRandomForestClassifier.
+        """
+        self.X_train = None
+        self.y_train = None
+
+    def fit(self, X_train, y_train):
+        """Fits a random forest classifier to X_train and y_train.
+
+        Args:
+            X_train(list of list of obj): The list of training instances (samples).
+                The shape of X_train is (n_train_samples, n_features)
+            y_train(list of obj): The target y values (parallel to X_train)
+                The shape of y_train is n_train_samples
+
+        Notes:
+        """
+        pass # TODO: implement
+
+    def predict(self, X_test):
+        """Makes predictions for test instances in X_test.
+
+        Args:
+            X_test(list of list of obj): The list of testing samples
+                The shape of X_test is (n_test_samples, n_features)
+
+        Returns:
+            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+        """
+        pass # TODO: implement

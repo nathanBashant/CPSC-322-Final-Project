@@ -1,8 +1,8 @@
 """
-Reid Plowman
+Reid Plowman, Nathan Bashant
 CPSC 322-02, Fall 2022
-Programming Assignment #7
-11/15/2022
+Partner Project
+12/1/2022
 
 Description: This module contains various algorithms for evaluating classifiers.
 """

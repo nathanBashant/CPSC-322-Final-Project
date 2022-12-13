@@ -591,6 +591,7 @@ class MyRandomForestClassifier:
         tree_accuracies = [sorted_by_accuracy[i][1] for i in range(self.num_best)]
         self.forest = best_m_trees
         self.accuracies = tree_accuracies
+        print(self.accuracies)
         pass # TODO: implement
 
     def predict(self, X_test):
@@ -675,8 +676,9 @@ class MyRandomForestClassifier:
                 y_out_of_bag.append(y[index])
 
         # if somehow all the indices get selected, add the last one from samples to out of bag
-        X_out_of_bag.append(X_sample.pop())
-        y_out_of_bag.append(y_sample.pop())
+        if len(X_out_of_bag) == 0:
+            X_out_of_bag.append(X_sample.pop())
+            y_out_of_bag.append(y_sample.pop())
 
         # return the sample and out of bag lists
         return X_sample, X_out_of_bag, y_sample, y_out_of_bag

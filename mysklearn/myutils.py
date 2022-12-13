@@ -50,6 +50,16 @@ def get_columns_of_table(table, col_names):
         data.append(row_data)
     return data
 
+def calc_random_forest_performance(X, y, clf, pos_label=None, class_name=None):
+
+    remainder_indices, test_indices = myevaluation.stratified_kfold_split(X, y, 3, shuffle=True)[0]
+    print(remainder_indices, test_indices)
+
+    X_remainder = [X[index] for index in remainder_indices]
+    y_remainder = [y[index] for index in remainder_indices]
+    X_test = [X[index] for index in test_indices]
+    y_test = [y[index] for index in test_indices]
+
 def calc_classifier_performance(X, y, clf, clf_name, folds, pos_label=None, class_name=None):
     """Calculates and prints the accuracy, error rate, precision, recall,
         and F1 score of the classifier for the given X and y values. Uses stratified k-fold

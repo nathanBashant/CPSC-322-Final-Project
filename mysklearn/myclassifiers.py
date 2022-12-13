@@ -8,6 +8,7 @@ Description: This module contains classes for different classifiers.
 """
 import operator
 import math
+import pprint 
 import numpy as np
 from scipy import stats
 
@@ -183,7 +184,7 @@ class MyDecisionTreeClassifier:
             https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html
         Terminology: instance = sample = row and attribute = feature = column
     """
-    def __init__(self):
+    def __init__(self, num_attributes=None):
         """Initializer for MyDecisionTreeClassifier.
         """
         self.X_train = None
@@ -191,6 +192,7 @@ class MyDecisionTreeClassifier:
         self.tree = None
         self.header = None
         self.attribute_domains = None
+        self.num_attributes = num_attributes # used in random forest classification 
 
     def fit(self, X_train, y_train):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT
@@ -250,6 +252,37 @@ class MyDecisionTreeClassifier:
         predictions = [self.tdidt_predict(self.tree, test_val) for test_val in X_test]
         return predictions
 
+    def print_decision_rules(self, attribute_names=None, class_name="class"):
+        """Prints the decision rules from the tree in the format
+        "IF att == val AND ... THEN class = label", one rule on each line.
+
+        Args:
+            attribute_names(list of str or None): A list of attribute names to use in the decision rules
+                (None if a list is not provided and the default attribute names based on indexes
+                (e.g. "att0", "att1", ...) should be used).
+            class_name(str): A string to use for the class name in the decision rules
+                ("class" if a string is not provided and the default name "class" should be used).
+        """
+        att_names = attribute_names
+        if att_names is None:
+            att_names = self.header
+
+        #pp = pprint.PrettyPrinter(indent=4)
+        #pp.pprint(self.tree)
+        rule = "IF"
+
+        att_index = self.header.index(self.tree[1])
+
+        # now loop through all of the value lists
+        att_rule = rule + " " + att_names[att_index]
+        for i in range(2, len(self.tree)):
+            value_list = self.tree[i]
+            #print(value_list)
+            val_rule = att_rule + " == " + value_list[1]
+            #print(val_rule)
+            # we have a match, recurse on this value's subtree
+            self.decision_rule_recurse(value_list[2], val_rule, att_names, class_name)
+
     def tdidt(self, current_instances, available_attributes, prev_node_count=None):
         """Recursive TDIDT algorithm that creates a decision tree for the current instances.
 
@@ -263,9 +296,13 @@ class MyDecisionTreeClassifier:
         """
         if prev_node_count is None:
             prev_node_count = len(current_instances)
-        # basic approach (uses recursion!!):
         #print("available attributes:", available_attributes)
         #print(current_instances)
+
+        # select attribue subset (only used in random forest classification)
+        if self.num_attributes is not None:
+            available_attributes = MyDecisionTreeClassifier.compute_random_subset(available_attributes, \
+                self.num_attributes)
 
         # select an attribute to split on
         entropy_vals = MyDecisionTreeClassifier.calc_entropy(current_instances, available_attributes)
@@ -316,6 +353,21 @@ class MyDecisionTreeClassifier:
             tree.append(value_subtree)
         #print(tree)
         return tree
+
+    @staticmethod
+    def compute_random_subset(values, num_values):
+        """Randomly selects a given number of values from the list of values and returns them.
+
+        Args:
+            values(list of obj): the list of values to select from
+            num_values(int): the number of values to select
+        
+        Returns:
+            values_copy(list of obj): list of the randomly selected values
+        """
+        values_copy = values.copy() # shallow copy
+        np.random.shuffle(values_copy) # inplace shuffle
+        return values_copy[:num_values]
 
     def partition_instances(self, instances, attribute):
         """Group by function for use in tdidt.
@@ -443,6 +495,37 @@ class MyDecisionTreeClassifier:
                 return self.tdidt_predict(value_list[2], instance)
         return None
 
+    def decision_rule_recurse(self, tree, current_rule, att_names, class_name):
+        """Recursive helper function for printing decision rules.
+
+        Args:
+            tree: decision tree stored as nested lists
+            current_rule(str): string representation of the current decision rule
+            att_names(list of str): A list of attribute names to use in the decision rules
+            class_name(str): A string to use for the class name in the decision rules
+        """
+        # are we at a leaf node (base case)
+        # or an attribute node (need to recurse)
+        info_type = tree[0] # Attribute or Leaf
+        if info_type == "Leaf":
+            # base case
+            rule_end = "  THEN  " + class_name + " = " + str(tree[1])
+            print(current_rule + rule_end)
+            return
+
+        # if we are here, then we are at an Attribute node
+        att_index = self.header.index(tree[1])
+        # now loop through all of the value lists
+
+        att_rule = current_rule + "  AND  " + att_names[att_index]
+        for i in range(2, len(tree)):
+            value_list = tree[i]
+            #print(value_list)
+            val_rule = att_rule + " == " + value_list[1]
+            #print(val_rule)
+            # we have a match, recurse on this value's subtree
+            self.decision_rule_recurse(value_list[2], val_rule, att_names, class_name)
+
 class MyRandomForestClassifier:
     """Represents a random forest classifier.
 
@@ -457,23 +540,57 @@ class MyRandomForestClassifier:
     Notes:
         Terminology: instance = sample = row and attribute = feature = column
     """
-    def __init__(self):
+    def __init__(self, num_trees, num_best, num_attributes, seed_random=False):
         """Initializer for MyRandomForestClassifier.
         """
         self.X_train = None
         self.y_train = None
+        self.num_trees = num_trees # N
+        self.num_best = num_best # M
+        self.num_attributes = num_attributes # F
+        self.seed_random = seed_random
+        self.forest = None
+        self.tree_accuracies = None
 
-    def fit(self, X_train, y_train):
+    def fit(self, X, y):
         """Fits a random forest classifier to X_train and y_train.
 
         Args:
-            X_train(list of list of obj): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
-            y_train(list of obj): The target y values (parallel to X_train)
-                The shape of y_train is n_train_samples
+            X(list of list of obj): The list of training instances (samples).
+                The shape of X is (n_samples, n_features)
+            y(list of obj): The target y values (parallel to X)
+                The shape of y is n_samples
 
         Notes:
         """
+        trees = []
+
+        # create the trees and store them with their accuracy value in a list
+        for i in range(self.num_trees): 
+            random_state = None
+            if self.seed_random:
+                # use i for random state for bootstrapping
+                random_state = i
+            X_train, X_test, y_train, y_test = MyRandomForestClassifier.bootstrap_sample(X, y, \
+                random_state=random_state)
+            tree = MyDecisionTreeClassifier(self.num_attributes)
+            tree.fit(X_train, y_train)
+            #tree.print_decision_rules(["level", "lang", "tweets", "phd", "interviewed_well"])
+
+            y_pred = tree.predict(X_test)
+            accuracy = MyRandomForestClassifier.accuracy_score(y_test, y_pred)
+            #print(accuracy)
+
+            trees.append([tree, accuracy])
+
+        # sort the trees by highest accuracy
+        sorted_by_accuracy = sorted(trees,key=lambda l:l[1], reverse=True)
+
+        # then save the best M trees
+        best_m_trees = [sorted_by_accuracy[i][0] for i in range(self.num_best)]
+        tree_accuracies = [sorted_by_accuracy[i][1] for i in range(self.num_best)]
+        self.forest = best_m_trees
+        self.accuracies = tree_accuracies
         pass # TODO: implement
 
     def predict(self, X_test):
@@ -486,4 +603,110 @@ class MyRandomForestClassifier:
         Returns:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
-        pass # TODO: implement
+        predictions = []
+        for test_val in X_test:
+
+            # get predicted value from each tree and store in pred_vals
+            pred_vals = []
+            for tree in self.forest:
+                pred_val = tree.predict([test_val])[0]
+                if pred_val is None:
+                    pred_val = ""
+                pred_vals.append(pred_val)
+            
+            # use majority voting to select predicted value
+            pred_val = stats.mode(pred_vals)[0][0]
+            if pred_val == "":
+                pred_val = None
+            predictions.append(pred_val)
+        return predictions
+
+    @staticmethod
+    def bootstrap_sample(X, y, n_samples=None, random_state=None):
+        """Split dataset into bootstrapped training set and out of bag test set.
+
+        Args:
+            X(list of list of obj): The list of samples
+            y(list of obj): The target y values (parallel to X)
+            n_samples(int): Number of samples to generate. If left to None (default) this is automatically
+                set to the first dimension of X.
+            random_state(int): integer used for seeding a random number generator for reproducible results
+
+        Returns:
+            X_sample(list of list of obj): The list of samples
+            X_out_of_bag(list of list of obj): The list of "out of bag" samples (e.g. left-over samples)
+            y_sample(list of obj): The list of target y values sampled (parallel to X_sample)
+            y_out_of_bag(list of obj): The list of target y values "out of bag" (parallel to X_out_of_bag)
+        Notes:
+            Loosely based on sklearn's resample():
+                https://scikit-learn.org/stable/modules/generated/sklearn.utils.resample.html
+            Sample indexes of X with replacement, then build X_sample and X_out_of_bag
+                as lists of instances using sampled indexes (use same indexes to build
+                y_sample and y_out_of_bag)
+        """
+        # initialize variables
+        X_sample = []
+        X_out_of_bag = []
+        y_sample = []
+        y_out_of_bag = []
+        selected_row_indexes = []
+        n = len(X)
+
+        # if an n value is given, use it instead of len(X)
+        if n_samples is not None:
+            n = n_samples
+
+        np.random.seed(random_state)
+
+        # randomly choose an element from the list and add it to the samples list, and add its index to the
+        # selected indexes list. repeat this n times (n is number of elements in the data)
+        for _ in range(0, n):
+            index = np.random.randint(0, n)
+            X_sample.append(X[index])
+            # only use y values if a list of y values is given
+            y_sample.append(y[index])
+            if index not in selected_row_indexes:
+                selected_row_indexes.append(index)
+
+        # add all the unused samples to the out of bag lists
+        for index, sample in enumerate(X):
+            if index not in selected_row_indexes:
+                X_out_of_bag.append(sample)
+                y_out_of_bag.append(y[index])
+
+        # if somehow all the indices get selected, add the last one from samples to out of bag
+        X_out_of_bag.append(X_sample.pop())
+        y_out_of_bag.append(y_sample.pop())
+
+        # return the sample and out of bag lists
+        return X_sample, X_out_of_bag, y_sample, y_out_of_bag
+
+    @staticmethod
+    def accuracy_score(y_true, y_pred, normalize=True):
+        """Compute the classification prediction accuracy score.
+
+        Args:
+            y_true(list of obj): The ground_truth target y values
+                The shape of y is n_samples
+            y_pred(list of obj): The predicted target y values (parallel to y_true)
+                The shape of y is n_samples
+            normalize(bool): If False, return the number of correctly classified samples.
+                Otherwise, return the fraction of correctly classified samples.
+
+        Returns:
+            score(float): If normalize == True, return the fraction of correctly classified samples (float),
+                else returns the number of correctly classified samples (int).
+
+        Notes:
+            Loosely based on sklearn's accuracy_score():
+                https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html#sklearn.metrics.accuracy_score
+        """
+        correct_count = 0
+        # add 1 to correct_count for each pair of matching y_pred and y_true values
+        for index, true_val in enumerate(y_true):
+            if true_val == y_pred[index]:
+                correct_count += 1
+        # return the fraction of the correctly classified samples if normalize is true
+        if normalize:
+            return float(correct_count) / len(y_true)
+        return correct_count

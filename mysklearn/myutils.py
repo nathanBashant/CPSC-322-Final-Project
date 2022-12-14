@@ -4,7 +4,7 @@ CPSC 322-02, Fall 2022
 Partner Project
 12/1/2022
 
-Description: This module contains utility functions for use in the Jupyter Notebook.
+Description: This module contains utility functions for use in the Jupyter Notebooks.
 """
 import numpy as np
 from tabulate import tabulate
@@ -12,10 +12,12 @@ from tabulate import tabulate
 from mysklearn import myevaluation
 from mysklearn.mypytable import MyPyTable
 
-def exam_score_discretizer(var):
-    if var >= 80:
+def exam_score_discretizer(score):
+    """Maps the given score to a string label.
+    """
+    if score >= 80:
         return "excellent"
-    if var >= 50:
+    if score >= 50:
         return "fair"
     return "low"
 
@@ -24,30 +26,27 @@ def discretize_columns(table, col_names, discretizer):
 
     Args:
         table(MyPyTable): MyPyTable object containing the dataset
-        col_names(list of str): names of the column to discretize the values of
+        col_names(list of str): names of the columns to perform discretization on
+        discretizer(function): a function that discretizes a numeric value into
+            a string label. The function's signature is func(obj) -> obj
+
+    Returns:
+        discretized_table(MyPyTable): new MyPyTable object containing the discretized dataset
     """
-    discretized_data = table.get_other_columns(col_names).data
+    # get a copy of the data without the specified columns
+    new_table = table.get_other_columns(col_names)
+    discretized_data = new_table.data
+
+    # create new header
+    new_column_names = new_table.column_names
+    new_column_names.extend(col_names)
 
     for index, row in enumerate(discretized_data):
         for col_name in col_names:
+            # add the discretized values to the end of each row
             row.append(discretizer(table.data[index][table.column_names.index(col_name)]))
-    
-    return MyPyTable(table.column_names, discretized_data)
 
-
-def get_frequencies_col(col_name):
-    col = col_name.copy()
-    col.sort() 
-    
-    values = [] 
-    counts = []
-    for value in col:
-        if value not in values:
-            values.append(value)
-            counts.append(1)
-        else:
-            counts[-1] += 1
-    return values, counts
+    return MyPyTable(new_column_names, discretized_data)
 
 def get_columns_of_table(table, col_names):
     """Returns a 2D list with the data in the specified columns.

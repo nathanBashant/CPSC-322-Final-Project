@@ -8,19 +8,20 @@ Description: This module contains classes for different classifiers.
 """
 import operator
 import math
-import pprint 
 import numpy as np
 from scipy import stats
+
+from mysklearn import myevaluation
 
 class MyKNeighborsClassifier:
     """Represents a simple k nearest neighbors classifier.
 
     Attributes:
-        n_neighbors(int): number of k neighbors
+        n_neighbors(int): number of k neighbors.
         X_train(list of list of numeric vals): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
+                The shape of X_train is (n_train_samples, n_features).
         y_train(list of obj): The target y values (parallel to X_train).
-            The shape of y_train is n_samples
+            The shape of y_train is n_samples.
 
     Notes:
         Loosely based on sklearn's KNeighborsClassifier:
@@ -32,7 +33,7 @@ class MyKNeighborsClassifier:
         """Initializer for MyKNeighborsClassifier.
 
         Args:
-            n_neighbors(int): number of k neighbors
+            n_neighbors(int): number of k neighbors.
         """
         self.n_neighbors = n_neighbors
         self.X_train = None
@@ -43,12 +44,12 @@ class MyKNeighborsClassifier:
 
         Args:
             X_train(list of list of numeric vals): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
-            y_train(list of obj): The target y values (parallel to X_train)
-                The shape of y_train is n_train_samples
+                The shape of X_train is (n_train_samples, n_features).
+            y_train(list of obj): The target y values (parallel to X_train).
+                The shape of y_train is n_train_samples.
 
         Notes:
-            Since kNN is a lazy learning algorithm, this method just stores X_train and y_train
+            Since kNN is a lazy learning algorithm, this method just stores X_train and y_train.
         """
         self.X_train = X_train
         self.y_train = y_train
@@ -57,14 +58,14 @@ class MyKNeighborsClassifier:
         """Determines the k closest neighbors of each test instance.
 
         Args:
-            X_test(list of list of numeric vals): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
+            X_test(list of list of numeric vals): The list of testing samples.
+                The shape of X_test is (n_test_samples, n_features).
 
         Returns:
             distances(list of list of float): 2D list of k nearest neighbor distances
-                for each instance in X_test
+                for each instance in X_test.
             neighbor_indices(list of list of int): 2D list of k nearest neighbor
-                indices in X_train (parallel to distances)
+                indices in X_train (parallel to distances).
         """
         distances = []
         neighbor_indices = []
@@ -84,14 +85,14 @@ class MyKNeighborsClassifier:
         """Makes predictions for test instances in X_test.
 
         Args:
-            X_test(list of list of numeric vals): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
+            X_test(list of list of numeric vals): The list of testing samples.
+                The shape of X_test is (n_test_samples, n_features).
 
         Returns:
             y_predicted(list of obj): The predicted target y values (parallel to X_test)
         """
         y_predicted = []
-        distances, neighbor_indices = self.kneighbors(X_test)
+        neighbor_indices = self.kneighbors(X_test)[1]
         for test_instance_index in range(len(X_test)):
             y_vals = []
             for index in neighbor_indices[test_instance_index]:
@@ -122,7 +123,7 @@ class MyDummyClassifier:
 
     Attributes:
         most_common_label(obj): whatever the most frequent class label in the
-            y_train passed into fit()
+            y_train passed into fit().
 
     Notes:
         Loosely based on sklearn's DummyClassifier:
@@ -139,9 +140,9 @@ class MyDummyClassifier:
 
         Args:
             X_train(list of list of numeric vals): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
-            y_train(list of obj): The target y values (parallel to X_train)
-                The shape of y_train is n_train_samples
+                The shape of X_train is (n_train_samples, n_features).
+            y_train(list of obj): The target y values (parallel to X_train).
+                The shape of y_train is n_train_samples.
 
         Notes:
             Since Zero-R only predicts the most frequent class label, this method
@@ -156,11 +157,11 @@ class MyDummyClassifier:
         """Makes predictions for test instances in X_test.
 
         Args:
-            X_test(list of list of numeric vals): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
+            X_test(list of list of numeric vals): The list of testing samples.
+                The shape of X_test is (n_test_samples, n_features).
 
         Returns:
-            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+            y_predicted(list of obj): The predicted target y values (parallel to X_test).
         """
         y_predicted = []
         i = 0
@@ -174,9 +175,9 @@ class MyDecisionTreeClassifier:
 
     Attributes:
         X_train(list of list of obj): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
+                The shape of X_train is (n_train_samples, n_features).
         y_train(list of obj): The target y values (parallel to X_train).
-            The shape of y_train is n_samples
+            The shape of y_train is n_samples.
         tree(nested list): The extracted tree model.
 
     Notes:
@@ -192,7 +193,7 @@ class MyDecisionTreeClassifier:
         self.tree = None
         self.header = None
         self.attribute_domains = None
-        self.num_attributes = num_attributes # used in random forest classification 
+        self.num_attributes = num_attributes # used in random forest classification
 
     def fit(self, X_train, y_train):
         """Fits a decision tree classifier to X_train and y_train using the TDIDT
@@ -200,9 +201,9 @@ class MyDecisionTreeClassifier:
 
         Args:
             X_train(list of list of obj): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
-            y_train(list of obj): The target y values (parallel to X_train)
-                The shape of y_train is n_train_samples
+                The shape of X_train is (n_train_samples, n_features).
+            y_train(list of obj): The target y values (parallel to X_train).
+                The shape of y_train is n_train_samples.
 
         Notes:
             Since TDIDT is an eager learning algorithm, this method builds a decision tree model
@@ -243,11 +244,11 @@ class MyDecisionTreeClassifier:
         """Makes predictions for test instances in X_test.
 
         Args:
-            X_test(list of list of obj): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
+            X_test(list of list of obj): The list of testing samples.
+                The shape of X_test is (n_test_samples, n_features).
 
         Returns:
-            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+            y_predicted(list of obj): The predicted target y values (parallel to X_test).
         """
         predictions = [self.tdidt_predict(self.tree, test_val) for test_val in X_test]
         return predictions
@@ -289,10 +290,10 @@ class MyDecisionTreeClassifier:
         Args:
             current_instances(list of list of obj): list of instances in the current tree.
             available_attributes(list of str): list of usable attributes for the current tree.
-            prev_node_count(int): number of instances in the previous node. (for use in case 3)
+            prev_node_count(int): number of instances in the previous node. (for use in case 3).
 
         Returns:
-            tree: decision tree stored as nested lists
+            tree: decision tree stored as nested lists.
         """
         if prev_node_count is None:
             prev_node_count = len(current_instances)
@@ -359,11 +360,11 @@ class MyDecisionTreeClassifier:
         """Randomly selects a given number of values from the list of values and returns them.
 
         Args:
-            values(list of obj): the list of values to select from
-            num_values(int): the number of values to select
-        
+            values(list of obj): the list of values to select from.
+            num_values(int): the number of values to select.
+
         Returns:
-            values_copy(list of obj): list of the randomly selected values
+            values_copy(list of obj): list of the randomly selected values.
         """
         values_copy = values.copy() # shallow copy
         np.random.shuffle(values_copy) # inplace shuffle
@@ -373,11 +374,11 @@ class MyDecisionTreeClassifier:
         """Group by function for use in tdidt.
 
         Args:
-            instances(list of list of obj): list of instances
-            attribute(str): attribute to perform the groupby on
+            instances(list of list of obj): list of instances.
+            attribute(str): attribute to perform the groupby on.
 
         Returns:
-            partitions(dict): partitions of instances after the groupby is performed
+            partitions(dict): partitions of instances after the groupby is performed.
         """
         # this is a gorup by attribute domain
         att_index = self.header.index(attribute)
@@ -401,7 +402,7 @@ class MyDecisionTreeClassifier:
             attributes(list of str): list of attributes.
 
         Returns:
-            entropy_vals(list of float): list of entropy values, parallel to attributes
+            entropy_vals(list of float): list of entropy values, parallel to attributes.
         """
         entropy_vals = []
         labels = [instance[-1] for instance in instances]
@@ -454,10 +455,10 @@ class MyDecisionTreeClassifier:
         end of the list. Returns true if all class labels match.
 
         Args:
-            instances(list of list of obj): the list of instances
+            instances(list of list of obj): the list of instances.
 
         Returns:
-            matching(bool): whether all the class labels are the same or not
+            matching(bool): whether all the class labels are the same or not.
         """
         first_label = instances[0][-1]
         for instance in instances:
@@ -470,11 +471,11 @@ class MyDecisionTreeClassifier:
         """Recursive helper function for finding the predicted value for the given instance.
 
         Args:
-            tree: decision tree stored as nested lists
-            instance(list of obj): unknown instance to use for predictions
+            tree: decision tree stored as nested lists.
+            instance(list of obj): unknown instance to use for predictions.
 
         Returns:
-            label(obj): value stored at leaf node
+            label(obj): value stored at leaf node.
         """
         # are we at a leaf node (base case)
         # or an attribute node (need to recurse)
@@ -499,10 +500,10 @@ class MyDecisionTreeClassifier:
         """Recursive helper function for printing decision rules.
 
         Args:
-            tree: decision tree stored as nested lists
-            current_rule(str): string representation of the current decision rule
-            att_names(list of str): A list of attribute names to use in the decision rules
-            class_name(str): A string to use for the class name in the decision rules
+            tree: decision tree stored as nested lists.
+            current_rule(str): string representation of the current decision rule.
+            att_names(list of str): A list of attribute names to use in the decision rules.
+            class_name(str): A string to use for the class name in the decision rules.
         """
         # are we at a leaf node (base case)
         # or an attribute node (need to recurse)
@@ -531,11 +532,14 @@ class MyRandomForestClassifier:
 
     Attributes:
         X_train(list of list of obj): The list of training instances (samples).
-                The shape of X_train is (n_train_samples, n_features)
+            The shape of X_train is (n_train_samples, n_features).
         y_train(list of obj): The target y values (parallel to X_train).
-            The shape of y_train is n_samples
-
-        TODO: Fill this out properly
+            The shape of y_train is n_samples.
+        forest_parameters(list of int): list for storing the N, M, and F parameters for the forest.
+        seed_random(bool): whether or not to seed the random state when bootstrapping the data.
+        forest(list of MyDecisionTreeClassifier): the list for storing the M best
+            MyDecisionTreeClassifier objects so they can be used later.
+        tree_accuracies(list of float): list of the accuracy values of the trees (parallel to forest).
 
     Notes:
         Terminology: instance = sample = row and attribute = feature = column
@@ -545,9 +549,7 @@ class MyRandomForestClassifier:
         """
         self.X_train = None
         self.y_train = None
-        self.num_trees = num_trees # N
-        self.num_best = num_best # M
-        self.num_attributes = num_attributes # F
+        self.forest_parameters = [num_trees, num_best, num_attributes] # [N, M, F]
         self.seed_random = seed_random
         self.forest = None
         self.tree_accuracies = None
@@ -557,40 +559,39 @@ class MyRandomForestClassifier:
 
         Args:
             X(list of list of obj): The list of training instances (samples).
-                The shape of X is (n_samples, n_features)
-            y(list of obj): The target y values (parallel to X)
-                The shape of y is n_samples
-
-        Notes:
+                The shape of X is (n_samples, n_features).
+            y(list of obj): The target y values (parallel to X).
+                The shape of y is n_samples.
         """
         trees = []
 
         # create the trees and store them with their accuracy value in a list
-        for i in range(self.num_trees): 
+        for i in range(self.forest_parameters[0]):
             random_state = None
             if self.seed_random:
                 # use i for random state for bootstrapping
                 random_state = i
-            X_train, X_test, y_train, y_test = MyRandomForestClassifier.bootstrap_sample(X, y, \
+
+            # bootstrap to create the training and validation sets for this classifier
+            X_train, X_test, y_train, y_test = myevaluation.bootstrap_sample(X, y, \
                 random_state=random_state)
-            tree = MyDecisionTreeClassifier(self.num_attributes)
+            tree = MyDecisionTreeClassifier(self.forest_parameters[2])
             tree.fit(X_train, y_train)
-            #tree.print_decision_rules(["level", "lang", "tweets", "phd", "interviewed_well"])
 
             y_pred = tree.predict(X_test)
-            accuracy = MyRandomForestClassifier.accuracy_score(y_test, y_pred)
-            #print(accuracy)
+            accuracy = myevaluation.accuracy_score(y_test, y_pred)
 
+            # add the tree object and its accuracy to the list of trees
             trees.append([tree, accuracy])
 
         # sort the trees by highest accuracy
         sorted_by_accuracy = sorted(trees,key=lambda l:l[1], reverse=True)
 
         # then save the best M trees
-        best_m_trees = [sorted_by_accuracy[i][0] for i in range(self.num_best)]
-        tree_accuracies = [sorted_by_accuracy[i][1] for i in range(self.num_best)]
+        best_m_trees = [sorted_by_accuracy[i][0] for i in range(self.forest_parameters[1])]
+        tree_accuracies = [sorted_by_accuracy[i][1] for i in range(self.forest_parameters[1])]
         self.forest = best_m_trees
-        self.accuracies = tree_accuracies
+        self.tree_accuracies = tree_accuracies
         self.X_train = X
         self.y_train = y
         #print(self.accuracies)
@@ -599,11 +600,11 @@ class MyRandomForestClassifier:
         """Makes predictions for test instances in X_test.
 
         Args:
-            X_test(list of list of obj): The list of testing samples
-                The shape of X_test is (n_test_samples, n_features)
+            X_test(list of list of obj): The list of testing samples.
+                The shape of X_test is (n_test_samples, n_features).
 
         Returns:
-            y_predicted(list of obj): The predicted target y values (parallel to X_test)
+            y_predicted(list of obj): The predicted target y values (parallel to X_test).
         """
         predictions = []
         for test_val in X_test:
@@ -631,94 +632,3 @@ class MyRandomForestClassifier:
 
             predictions.append(pred_val)
         return predictions
-
-    @staticmethod
-    def bootstrap_sample(X, y, n_samples=None, random_state=None):
-        """Split dataset into bootstrapped training set and out of bag test set.
-
-        Args:
-            X(list of list of obj): The list of samples
-            y(list of obj): The target y values (parallel to X)
-            n_samples(int): Number of samples to generate. If left to None (default) this is automatically
-                set to the first dimension of X.
-            random_state(int): integer used for seeding a random number generator for reproducible results
-
-        Returns:
-            X_sample(list of list of obj): The list of samples
-            X_out_of_bag(list of list of obj): The list of "out of bag" samples (e.g. left-over samples)
-            y_sample(list of obj): The list of target y values sampled (parallel to X_sample)
-            y_out_of_bag(list of obj): The list of target y values "out of bag" (parallel to X_out_of_bag)
-        Notes:
-            Loosely based on sklearn's resample():
-                https://scikit-learn.org/stable/modules/generated/sklearn.utils.resample.html
-            Sample indexes of X with replacement, then build X_sample and X_out_of_bag
-                as lists of instances using sampled indexes (use same indexes to build
-                y_sample and y_out_of_bag)
-        """
-        # initialize variables
-        X_sample = []
-        X_out_of_bag = []
-        y_sample = []
-        y_out_of_bag = []
-        selected_row_indexes = []
-        n = len(X)
-
-        # if an n value is given, use it instead of len(X)
-        if n_samples is not None:
-            n = n_samples
-
-        np.random.seed(random_state)
-
-        # randomly choose an element from the list and add it to the samples list, and add its index to the
-        # selected indexes list. repeat this n times (n is number of elements in the data)
-        for _ in range(0, n):
-            index = np.random.randint(0, n)
-            X_sample.append(X[index])
-            # only use y values if a list of y values is given
-            y_sample.append(y[index])
-            if index not in selected_row_indexes:
-                selected_row_indexes.append(index)
-
-        # add all the unused samples to the out of bag lists
-        for index, sample in enumerate(X):
-            if index not in selected_row_indexes:
-                X_out_of_bag.append(sample)
-                y_out_of_bag.append(y[index])
-
-        # if somehow all the indices get selected, add the last one from samples to out of bag
-        if len(X_out_of_bag) == 0:
-            X_out_of_bag.append(X_sample.pop())
-            y_out_of_bag.append(y_sample.pop())
-
-        # return the sample and out of bag lists
-        return X_sample, X_out_of_bag, y_sample, y_out_of_bag
-
-    @staticmethod
-    def accuracy_score(y_true, y_pred, normalize=True):
-        """Compute the classification prediction accuracy score.
-
-        Args:
-            y_true(list of obj): The ground_truth target y values
-                The shape of y is n_samples
-            y_pred(list of obj): The predicted target y values (parallel to y_true)
-                The shape of y is n_samples
-            normalize(bool): If False, return the number of correctly classified samples.
-                Otherwise, return the fraction of correctly classified samples.
-
-        Returns:
-            score(float): If normalize == True, return the fraction of correctly classified samples (float),
-                else returns the number of correctly classified samples (int).
-
-        Notes:
-            Loosely based on sklearn's accuracy_score():
-                https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html#sklearn.metrics.accuracy_score
-        """
-        correct_count = 0
-        # add 1 to correct_count for each pair of matching y_pred and y_true values
-        for index, true_val in enumerate(y_true):
-            if true_val == y_pred[index]:
-                correct_count += 1
-        # return the fraction of the correctly classified samples if normalize is true
-        if normalize:
-            return float(correct_count) / len(y_true)
-        return correct_count

@@ -9,9 +9,11 @@ contained in the mysklearn.myclassifiers module.
 """
 import numpy as np
 
+from mysklearn import myevaluation
 from mysklearn.myclassifiers import MyKNeighborsClassifier,\
     MyDummyClassifier,\
-    MyDecisionTreeClassifier
+    MyDecisionTreeClassifier,\
+    MyRandomForestClassifier
 
 # note: order is actual/received value, expected/solution
 def test_kneighbors_classifier_kneighbors():
@@ -356,3 +358,41 @@ def test_decision_tree_classifier_predict():
     iphone_test2 = [1, 1, "excellent"]
 
     assert treeclf.predict([iphone_test1, iphone_test2]) == ["yes", "yes"]
+
+def test_seeded_random_forest_predict():
+    """Test function
+    """
+    X_train = [
+        ["Senior", "Java", "no", "no"],
+        ["Senior", "Java", "no", "yes"],
+        ["Mid", "Python", "no", "no"],
+        ["Junior", "Python", "no", "no"],
+        ["Junior", "R", "yes", "no"],
+        ["Junior", "R", "yes", "yes"],
+        ["Mid", "R", "yes", "yes"],
+        ["Senior", "Python", "no", "no"],
+        ["Senior", "R", "yes", "no"],
+        ["Junior", "Python", "yes", "no"],
+        ["Senior", "Python", "yes", "yes"],
+        ["Mid", "Python", "no", "yes"],
+        ["Mid", "Java", "yes", "no"],
+        ["Junior", "Python", "no", "yes"]
+    ]
+    y_train = ["False", "False", "True", "True", "True", "False", "True", "False", "True", "True", "True", "True", "True", "False"]
+
+    # use 1 fold from statified kfold split for the remainder and test sets
+    remainder_indices, test_indices = myevaluation.stratified_kfold_split(X_train, \
+        y_train, 3, 6, True)[0]
+
+    # use the indices sets to get the values for the remainder and test sets
+    X_remainder = [X_train[index] for index in remainder_indices]
+    y_remainder = [y_train[index] for index in remainder_indices]
+    X_test = [X_train[index] for index in test_indices]
+    y_test = [y_train[index] for index in test_indices]
+
+    # create a MyRandomForestClassifier with N=20, M=7, and F=2
+    forest_clf = MyRandomForestClassifier(20, 7, 2, True)
+    forest_clf.fit(X_remainder, y_remainder)
+
+    y_pred = forest_clf.predict(X_test)
+    assert y_pred == y_test

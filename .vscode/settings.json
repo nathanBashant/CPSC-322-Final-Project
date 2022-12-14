@@ -1,0 +1,16 @@
+{
+    "jupyter.kernels.filter": [
+        {
+            "path": "c:\\Users\\natha\\miniconda3\\python.exe",
+            "type": "pythonEnvironment"
+        },
+        {
+            "path": "c:\\Users\\natha\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+            "type": "pythonEnvironment"
+        },
+        {
+            "path": "c:\\Users\\natha\\AppData\\Local\\Microsoft\\WindowsApps\\python3.9.exe",
+            "type": "pythonEnvironment"
+        }
+    ]
+}

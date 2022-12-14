@@ -591,8 +591,9 @@ class MyRandomForestClassifier:
         tree_accuracies = [sorted_by_accuracy[i][1] for i in range(self.num_best)]
         self.forest = best_m_trees
         self.accuracies = tree_accuracies
-        print(self.accuracies)
-        pass # TODO: implement
+        self.X_train = X
+        self.y_train = y
+        #print(self.accuracies)
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -614,11 +615,20 @@ class MyRandomForestClassifier:
                 if pred_val is None:
                     pred_val = ""
                 pred_vals.append(pred_val)
-            
+
             # use majority voting to select predicted value
             pred_val = stats.mode(pred_vals)[0][0]
             if pred_val == "":
-                pred_val = None
+                cleaned_pred = []
+                for val in pred_vals:
+                    if val != "":
+                        cleaned_pred.append(val)
+
+                if len(cleaned_pred) == 0:
+                    pred_val = stats.mode(self.y_train)[0][0]
+                else:
+                    pred_val = stats.mode(cleaned_pred)[0][0]
+
             predictions.append(pred_val)
         return predictions
 

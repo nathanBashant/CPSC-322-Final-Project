@@ -9,6 +9,7 @@ Description: This module contains the MyPyTable class, which is used for data st
 import copy
 import csv
 import statistics
+from tabulate import tabulate
 
 class MyPyTable:
     """Represents a 2D table of data with column names.
@@ -36,8 +37,7 @@ class MyPyTable:
     def pretty_print(self):
         """Prints the table in a nicely formatted grid structure.
         """
-        print(self.get_pretty_print())
-
+        print(tabulate(self.data, headers=self.column_names) + "\n")
 
     def get_shape(self):
         """Computes the dimension of the table (N x M).

@@ -291,6 +291,9 @@ def accuracy_score(y_true, y_pred, normalize=True):
     for index, true_val in enumerate(y_true):
         if true_val == y_pred[index]:
             correct_count += 1
+        elif y_pred[index] is None and correct_count > 1: # > 0 to avoid negative accuracy scores
+            # if there is no predicted value, further decrease the accuracy score
+            correct_count -= 2
     # return the fraction of the correctly classified samples if normalize is true
     if normalize:
         return float(correct_count) / len(y_true)

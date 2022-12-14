@@ -10,13 +10,30 @@ import numpy as np
 from tabulate import tabulate
 
 from mysklearn import myevaluation
+from mysklearn.mypytable import MyPyTable
 
-def discretizer(var):
+def exam_score_discretizer(var):
     if var >= 80:
         return "excellent"
     if var >= 50:
         return "fair"
     return "low"
+
+def discretize_columns(table, col_names, discretizer):
+    """Returns a new MyPyTable object after discretizing the values in the given columns.
+
+    Args:
+        table(MyPyTable): MyPyTable object containing the dataset
+        col_names(list of str): names of the column to discretize the values of
+    """
+    discretized_data = table.get_other_columns(col_names).data
+
+    for index, row in enumerate(discretized_data):
+        for col_name in col_names:
+            row.append(discretizer(table.data[index][table.column_names.index(col_name)]))
+    
+    return MyPyTable(table.column_names, discretized_data)
+
 
 def get_frequencies_col(col_name):
     col = col_name.copy()
@@ -50,28 +67,6 @@ def get_columns_of_table(table, col_names):
         data.append(row_data)
     return data
 
-def calc_random_forest_performance(X, y, clf, pos_label=None, class_name=None):
-
-    remainder_indices, test_indices = myevaluation.stratified_kfold_split(X, y, 3, shuffle=True, random_state=0)[0]
-    #print(remainder_indices, test_indices)
-
-    X_remainder = [X[index] for index in remainder_indices]
-    y_remainder = [y[index] for index in remainder_indices]
-    X_test = [X[index] for index in test_indices]
-    y_test = [y[index] for index in test_indices]
-
-    clf.fit(X_remainder, y_remainder)
-    y_pred = clf.predict(X_test)
-
-    correct_count = 0
-    for index, val in enumerate(y_pred):
-        if y_test[index] == val:
-            correct_count += 1
-    accuracy = correct_count / len(y_test)
-
-    print("Accuracy:" + str(round(accuracy * 100, 2)) + "%")
-    clf.forest[0].print_decision_rules()
-
 def calc_classifier_performance(X, y, clf, clf_name, folds, pos_label=None, class_name=None):
     """Calculates and prints the accuracy, error rate, precision, recall,
         and F1 score of the classifier for the given X and y values. Uses stratified k-fold
@@ -97,6 +92,8 @@ def calc_classifier_performance(X, y, clf, clf_name, folds, pos_label=None, clas
     precision_list = []
     recall_list = []
     f1_list = []
+
+    np.random.seed(None)
 
     for fold in folds:
         # unpack tuple

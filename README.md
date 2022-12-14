@@ -1,0 +1,4 @@
+## College Students Exam Analysis
+* Our project was to classify students exam scores and try to correctly predict any one subjects possible score. The exam scores are discretized into three categories: low, fair, and excellent. 
+* In order to run this project, simply clone the repository, and make sure you are running python in a conda environment. Finally, simply click "run all" in Technical_Report.ipynb, and viola! Results are all shown in the jupyter notebook.
+* Organization: mysklearn folder consists of our classifier classes, pytable class, and utils for helper functions. Input data consists of the exams csv containing all students information and exam scores. Finally, test_myclassifiers is our testing file (able to run with pytest), and plot_utils for creating helpful visuals
